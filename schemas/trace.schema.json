@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["trace_id", "repo", "workflow", "status", "timestamp"],
+  "properties": {
+    "trace_id": { "type": "string" },
+    "repo": { "type": "string" },
+    "workflow": { "type": "string" },
+    "status": { "type": "string" },
+    "timestamp": { "type": "string" }
+  }
+}
