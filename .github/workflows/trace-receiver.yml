@@ -1,0 +1,57 @@
+name: AVOT Trace Receiver
+
+on:
+  repository_dispatch:
+    types: [trace_log]
+
+permissions:
+  contents: write
+
+jobs:
+  receive-trace:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        run: |
+          echo "TRACE_ID=${{ github.event.client_payload.trace_id }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.event.client_payload.repo }}" >> $GITHUB_ENV
+          echo "WORKFLOW=${{ github.event.client_payload.workflow }}" >> $GITHUB_ENV
+          echo "STATUS=${{ github.event.client_payload.status }}" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+          echo "DATE=$(date -u +"%Y-%m-%d")" >> $GITHUB_ENV
+
+      - name: Ensure directories
+        run: |
+          mkdir -p logs/daily
+          mkdir -p traces
+
+      - name: Write trace file
+        run: |
+          FILE="traces/${TRACE_ID}.json"
+
+          echo '{' > $FILE
+          echo '  "trace_id": "'$TRACE_ID'",' >> $FILE
+          echo '  "repo": "'$REPO'",' >> $FILE
+          echo '  "workflow": "'$WORKFLOW'",' >> $FILE
+          echo '  "status": "'$STATUS'",' >> $FILE
+          echo '  "timestamp": "'$TIMESTAMP'"' >> $FILE
+          echo '}' >> $FILE
+
+      - name: Append to daily log
+        run: |
+          LOG_FILE="logs/daily/${DATE}.log"
+
+          echo "$TIMESTAMP | $TRACE_ID | $REPO | $WORKFLOW | $STATUS" >> $LOG_FILE
+
+      - name: Commit logs
+        run: |
+          git config user.name "trace-bot"
+          git config user.email "actions@github.com"
+
+          git add logs/ traces/
+          git commit -m "Trace log: $TRACE_ID" || echo "No changes"
+          git push
