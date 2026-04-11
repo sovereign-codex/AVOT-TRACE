@@ -1,0 +1,28 @@
+name: Trace Cleanup
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # daily
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove old traces (30+ days)
+        run: |
+          find traces/ -type f -mtime +30 -delete || true
+
+      - name: Commit cleanup
+        run: |
+          git config user.name "trace-bot"
+          git config user.email "actions@github.com"
+
+          git add traces/
+          git commit -m "Cleanup old traces" || echo "No changes"
+          git push
