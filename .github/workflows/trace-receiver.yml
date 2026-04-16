@@ -17,35 +17,71 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "TRACE_ID=${{ github.event.client_payload.trace_id }}" >> $GITHUB_ENV
-          echo "REPO=${{ github.event.client_payload.repo }}" >> $GITHUB_ENV
-          echo "WORKFLOW=${{ github.event.client_payload.workflow }}" >> $GITHUB_ENV
-          echo "STATUS=${{ github.event.client_payload.status }}" >> $GITHUB_ENV
-          echo "TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
-          echo "DATE=$(date -u +"%Y-%m-%d")" >> $GITHUB_ENV
+          TRACE_ID="${{ github.event.client_payload.trace_id || 'unknown-trace' }}"
+          REPO="${{ github.event.client_payload.repo || 'unknown-repo' }}"
+          WORKFLOW="${{ github.event.client_payload.workflow || 'unknown-workflow' }}"
+          STATUS="${{ github.event.client_payload.status || 'unknown-status' }}"
+
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          DATE=$(date -u +"%Y-%m-%d")
+          EVENT_ID=$(date +%s%N)
+
+          echo "TRACE_ID=$TRACE_ID" >> $GITHUB_ENV
+          echo "REPO=$REPO" >> $GITHUB_ENV
+          echo "WORKFLOW=$WORKFLOW" >> $GITHUB_ENV
+          echo "STATUS=$STATUS" >> $GITHUB_ENV
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+          echo "DATE=$DATE" >> $GITHUB_ENV
+          echo "EVENT_ID=$EVENT_ID" >> $GITHUB_ENV
 
       - name: Ensure directories
         run: |
           mkdir -p logs/daily
           mkdir -p traces
 
-      - name: Write trace file
+      # 🔥 APPEND-BASED TRACE (NOT OVERWRITE)
+      - name: Append to trace timeline
         run: |
           FILE="traces/${TRACE_ID}.json"
 
-          echo '{' > $FILE
-          echo '  "trace_id": "'$TRACE_ID'",' >> $FILE
-          echo '  "repo": "'$REPO'",' >> $FILE
-          echo '  "workflow": "'$WORKFLOW'",' >> $FILE
-          echo '  "status": "'$STATUS'",' >> $FILE
-          echo '  "timestamp": "'$TIMESTAMP'"' >> $FILE
-          echo '}' >> $FILE
+          EVENT=$(cat <<EOF
+{
+  "event_id": "$EVENT_ID",
+  "timestamp": "$TIMESTAMP",
+  "repo": "$REPO",
+  "workflow": "$WORKFLOW",
+  "status": "$STATUS"
+}
+EOF
+)
+
+          if [ -f "$FILE" ]; then
+            jq ".events += [$EVENT]" "$FILE" > tmp.json && mv tmp.json "$FILE"
+          else
+            echo "{
+  \"trace_id\": \"$TRACE_ID\",
+  \"events\": [
+    $EVENT
+  ]
+}" > "$FILE"
+          fi
 
       - name: Append to daily log
         run: |
           LOG_FILE="logs/daily/${DATE}.log"
 
-          echo "$TIMESTAMP | $TRACE_ID | $REPO | $WORKFLOW | $STATUS" >> $LOG_FILE
+          echo "$TIMESTAMP | $TRACE_ID | $REPO | $WORKFLOW | $STATUS" >> "$LOG_FILE"
+
+      # 🔥 OPTIONAL: HUMAN-READABLE TRACE SNAPSHOT
+      - name: Write latest snapshot
+        run: |
+          SNAPSHOT="logs/latest_${TRACE_ID}.txt"
+
+          echo "TRACE: $TRACE_ID" > "$SNAPSHOT"
+          echo "TIME: $TIMESTAMP" >> "$SNAPSHOT"
+          echo "REPO: $REPO" >> "$SNAPSHOT"
+          echo "WORKFLOW: $WORKFLOW" >> "$SNAPSHOT"
+          echo "STATUS: $STATUS" >> "$SNAPSHOT"
 
       - name: Commit logs
         run: |
@@ -53,5 +89,5 @@ jobs:
           git config user.email "actions@github.com"
 
           git add logs/ traces/
-          git commit -m "Trace log: $TRACE_ID" || echo "No changes"
+          git commit -m "Trace update: $TRACE_ID ($STATUS)" || echo "No changes"
           git push
