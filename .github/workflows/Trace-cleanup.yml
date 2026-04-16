@@ -12,17 +12,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Remove old traces (30+ days)
+      - name: Ensure archive directories
         run: |
-          find traces/ -type f -mtime +30 -delete || true
+          mkdir -p archive/traces
+          mkdir -p archive/logs
 
+      # 🔁 STEP 1 — ARCHIVE OLD TRACES (7+ days)
+      - name: Archive old traces
+        run: |
+          echo "Archiving traces older than 7 days..."
+
+          find traces/ -type f -mtime +7 -print -exec mv {} archive/traces/ \; || true
+
+      # 🔁 STEP 2 — ARCHIVE OLD LOGS (7+ days)
+      - name: Archive old logs
+        run: |
+          echo "Archiving logs older than 7 days..."
+
+          find logs/daily/ -type f -mtime +7 -print -exec mv {} archive/logs/ \; || true
+
+      # 🔥 STEP 3 — PURGE VERY OLD ARCHIVE (30+ days)
+      - name: Remove archived traces older than 30 days
+        run: |
+          echo "Purging archived traces older than 30 days..."
+
+          find archive/traces/ -type f -mtime +30 -delete || true
+
+      - name: Remove archived logs older than 30 days
+        run: |
+          echo "Purging archived logs older than 30 days..."
+
+          find archive/logs/ -type f -mtime +30 -delete || true
+
+      # 🔍 OPTIONAL — CLEAN EMPTY DIRECTORIES
+      - name: Remove empty directories
+        run: |
+          find archive/ -type d -empty -delete || true
+
+      # 💾 COMMIT CHANGES
       - name: Commit cleanup
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          git add traces/
-          git commit -m "Cleanup old traces" || echo "No changes"
+          git add traces/ logs/ archive/
+          git commit -m "Trace lifecycle cleanup" || echo "No changes"
+
           git push
