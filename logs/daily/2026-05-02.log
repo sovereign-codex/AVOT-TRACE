@@ -4,3 +4,4 @@
 2026-05-02T18:31:17Z | trc_control-center-test | sovereign-codex/Codex-control-center | control-center-result-receiver | result_stored
 2026-05-02T18:31:27Z | trc_test-signal | sovereign-codex/Codex-control-center | control-center-result-receiver | result_stored
 2026-05-02T23:04:38Z | trc_control center test | sovereign-codex/AVOT-ARCHIVIST | engine-runner | normalized
+2026-05-02T23:04:48Z | trc_test-signal | sovereign-codex/Codex-control-center | control-center-router | decision_created:avot-engine

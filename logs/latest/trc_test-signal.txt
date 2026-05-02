@@ -1,5 +1,5 @@
 TRACE: trc_test-signal
-TIME: 2026-05-02T18:31:27Z
+TIME: 2026-05-02T23:04:48Z
 REPO: sovereign-codex/Codex-control-center
-WORKFLOW: control-center-result-receiver
-STATUS: result_stored
+WORKFLOW: control-center-router
+STATUS: decision_created:avot-engine

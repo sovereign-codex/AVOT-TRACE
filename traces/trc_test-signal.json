@@ -7,6 +7,13 @@
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "control-center-result-receiver",
       "status": "result_stored"
+    },
+    {
+      "event_id": "25264109702-1-1777763088",
+      "timestamp": "2026-05-02T23:04:48Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "status": "decision_created:avot-engine"
     }
   ]
 }
