@@ -25,6 +25,14 @@
       "event_count": 1
     },
     {
+      "trace_id": "trc_test-signal",
+      "latest": "2026-05-02T18:31:27Z",
+      "status": "result_stored",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-result-receiver",
+      "event_count": 1
+    },
+    {
       "trace_id": "trc_test-trigger",
       "latest": "2026-05-02T18:31:02Z",
       "status": "no_route_found",
