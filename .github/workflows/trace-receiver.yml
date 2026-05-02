@@ -36,13 +36,13 @@ jobs:
           DATE=$(date -u +"%Y-%m-%d")
           EVENT_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$(date +%s)"
 
-          echo "TRACE_ID=$TRACE_ID" >> "$GITHUB_ENV"
-          echo "REPO=$REPO" >> "$GITHUB_ENV"
-          echo "WORKFLOW=$WORKFLOW" >> "$GITHUB_ENV"
-          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
-          echo "TIMESTAMP=$TIMESTAMP" >> "$GITHUB_ENV"
-          echo "DATE=$DATE" >> "$GITHUB_ENV"
-          echo "EVENT_ID=$EVENT_ID" >> "$GITHUB_ENV"
+          echo "TRACE_ID=$TRACE_ID" >> $GITHUB_ENV
+          echo "REPO=$REPO" >> $GITHUB_ENV
+          echo "WORKFLOW=$WORKFLOW" >> $GITHUB_ENV
+          echo "STATUS=$STATUS" >> $GITHUB_ENV
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+          echo "DATE=$DATE" >> $GITHUB_ENV
+          echo "EVENT_ID=$EVENT_ID" >> $GITHUB_ENV
 
       - name: Ensure directories
         run: |
@@ -125,22 +125,20 @@ jobs:
             mv tmp-index.json data/trace-index.json
           done
 
-            - name: Commit logs (conflict-proof)
+      - name: Commit logs (conflict-proof)
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          # Always sync but NEVER rebase
+          # Sync safely without rebase
           git fetch origin main
-
-          # Hard reset to remote to avoid conflicts
           git reset --hard origin/main
 
-          # Re-apply our changes
+          # Apply new changes
           git add logs/ traces/ data/
 
           # Commit if needed
-          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes to commit"
+          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes"
 
-          # Push safely
+          # Push
           git push origin main
