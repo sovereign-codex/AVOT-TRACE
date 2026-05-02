@@ -2,63 +2,104 @@ name: Trace Cleanup
 
 on:
   schedule:
-    - cron: "0 0 * * *" # daily
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: avot-trace-cleanup
+  cancel-in-progress: false
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout trace repo
         uses: actions/checkout@v4
 
-      - name: Ensure archive directories
+      - name: Ensure directories
         run: |
+          mkdir -p traces
+          mkdir -p logs/daily
+          mkdir -p logs/latest
           mkdir -p archive/traces
-          mkdir -p archive/logs
+          mkdir -p archive/logs/daily
+          mkdir -p archive/logs/latest
+          mkdir -p data
 
-      # 🔁 STEP 1 — ARCHIVE OLD TRACES (7+ days)
       - name: Archive old traces
         run: |
           echo "Archiving traces older than 7 days..."
-
           find traces/ -type f -mtime +7 -print -exec mv {} archive/traces/ \; || true
 
-      # 🔁 STEP 2 — ARCHIVE OLD LOGS (7+ days)
-      - name: Archive old logs
+      - name: Archive old daily logs
         run: |
-          echo "Archiving logs older than 7 days..."
+          echo "Archiving daily logs older than 7 days..."
+          find logs/daily/ -type f -mtime +7 -print -exec mv {} archive/logs/daily/ \; || true
 
-          find logs/daily/ -type f -mtime +7 -print -exec mv {} archive/logs/ \; || true
+      - name: Archive old latest snapshots
+        run: |
+          echo "Archiving latest snapshots older than 7 days..."
+          find logs/latest/ -type f -mtime +7 -print -exec mv {} archive/logs/latest/ \; || true
 
-      # 🔥 STEP 3 — PURGE VERY OLD ARCHIVE (30+ days)
       - name: Remove archived traces older than 30 days
         run: |
-          echo "Purging archived traces older than 30 days..."
-
           find archive/traces/ -type f -mtime +30 -delete || true
 
       - name: Remove archived logs older than 30 days
         run: |
-          echo "Purging archived logs older than 30 days..."
-
           find archive/logs/ -type f -mtime +30 -delete || true
 
-      # 🔍 OPTIONAL — CLEAN EMPTY DIRECTORIES
-      - name: Remove empty directories
+      - name: Rebuild trace index
+        run: |
+          jq -n '{ traces: [] }' > data/trace-index.json
+
+          shopt -s nullglob
+
+          for file in traces/*.json; do
+            trace_id=$(jq -r '.trace_id // "unknown"' "$file")
+            latest=$(jq -r '.events[-1].timestamp // ""' "$file")
+            status=$(jq -r '.events[-1].status // "unknown"' "$file")
+            repo=$(jq -r '.events[-1].repo // "unknown"' "$file")
+            workflow=$(jq -r '.events[-1].workflow // "unknown"' "$file")
+            count=$(jq -r '.events | length' "$file")
+
+            jq \
+              --arg trace_id "$trace_id" \
+              --arg latest "$latest" \
+              --arg status "$status" \
+              --arg repo "$repo" \
+              --arg workflow "$workflow" \
+              --argjson count "$count" \
+              '.traces += [{
+                trace_id: $trace_id,
+                latest: $latest,
+                status: $status,
+                repo: $repo,
+                workflow: $workflow,
+                event_count: $count
+              }]' data/trace-index.json > tmp-index.json
+
+            mv tmp-index.json data/trace-index.json
+          done
+
+      - name: Remove empty archive directories
         run: |
           find archive/ -type d -empty -delete || true
 
-      # 💾 COMMIT CHANGES
       - name: Commit cleanup
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          git add traces/ logs/ archive/
+          git pull origin main --rebase || echo "No remote changes"
+
+          git add traces/ logs/ archive/ data/
           git commit -m "Trace lifecycle cleanup" || echo "No changes"
 
-          git push
+          git pull origin main --rebase || echo "No remote changes"
+
+          git push origin main
