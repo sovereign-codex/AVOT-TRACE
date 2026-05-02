@@ -1,0 +1,12 @@
+{
+  "trace_id": "trc_interlink-test",
+  "events": [
+    {
+      "event_id": "25258861744-1-1777746647",
+      "timestamp": "2026-05-02T18:30:47Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "status": "decision_created:control-center"
+    }
+  ]
+}

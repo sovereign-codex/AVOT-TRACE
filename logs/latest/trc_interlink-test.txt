@@ -1,0 +1,5 @@
+TRACE: trc_interlink-test
+TIME: 2026-05-02T18:30:47Z
+REPO: sovereign-codex/Codex-control-center
+WORKFLOW: control-center-router
+STATUS: decision_created:control-center

@@ -7,6 +7,14 @@
       "repo": "sovereign-codex/AVOT-ARCHIVIST",
       "workflow": "engine-runner",
       "event_count": 1
+    },
+    {
+      "trace_id": "trc_interlink-test",
+      "latest": "2026-05-02T18:30:47Z",
+      "status": "decision_created:control-center",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "event_count": 1
     }
   ]
 }
