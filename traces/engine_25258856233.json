@@ -1,0 +1,12 @@
+{
+  "trace_id": "engine_25258856233",
+  "events": [
+    {
+      "event_id": "25258858807-1-1777746638",
+      "timestamp": "2026-05-02T18:30:38Z",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "status": "started"
+    }
+  ]
+}
