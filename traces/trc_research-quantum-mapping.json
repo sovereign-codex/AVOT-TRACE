@@ -1,0 +1,12 @@
+{
+  "trace_id": "trc_research-quantum-mapping",
+  "events": [
+    {
+      "event_id": "25264572590-1-1777764584",
+      "timestamp": "2026-05-02T23:29:44Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "status": "decision_created:control-center"
+    }
+  ]
+}
