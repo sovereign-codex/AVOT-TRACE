@@ -1,0 +1,12 @@
+{
+  "trace_id": "trc_control center test",
+  "events": [
+    {
+      "event_id": "25264106661-1-1777763078",
+      "timestamp": "2026-05-02T23:04:38Z",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "status": "normalized"
+    }
+  ]
+}
