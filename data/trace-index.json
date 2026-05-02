@@ -18,11 +18,11 @@
     },
     {
       "trace_id": "trc_control-center-test",
-      "latest": "2026-05-02T23:05:07Z",
-      "status": "engine_completed",
-      "repo": "sovereign-codex/AVOT-engine",
-      "workflow": "avot-engine-receiver",
-      "event_count": 3
+      "latest": "2026-05-02T23:05:18Z",
+      "status": "result_stored",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-result-receiver",
+      "event_count": 4
     },
     {
       "trace_id": "trc_interlink-test",

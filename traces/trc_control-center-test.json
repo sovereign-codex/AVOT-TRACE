@@ -21,6 +21,13 @@
       "repo": "sovereign-codex/AVOT-engine",
       "workflow": "avot-engine-receiver",
       "status": "engine_completed"
+    },
+    {
+      "event_id": "25264117910-1-1777763118",
+      "timestamp": "2026-05-02T23:05:18Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-result-receiver",
+      "status": "result_stored"
     }
   ]
 }
