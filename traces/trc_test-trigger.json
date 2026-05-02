@@ -1,0 +1,12 @@
+{
+  "trace_id": "trc_test-trigger",
+  "events": [
+    {
+      "event_id": "25258865417-1-1777746662",
+      "timestamp": "2026-05-02T18:31:02Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "cross-repo-dispatcher",
+      "status": "no_route_found"
+    }
+  ]
+}

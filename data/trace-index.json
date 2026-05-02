@@ -15,6 +15,14 @@
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "control-center-router",
       "event_count": 1
+    },
+    {
+      "trace_id": "trc_test-trigger",
+      "latest": "2026-05-02T18:31:02Z",
+      "status": "no_route_found",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "cross-repo-dispatcher",
+      "event_count": 1
     }
   ]
 }
