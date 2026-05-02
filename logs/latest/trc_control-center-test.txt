@@ -1,5 +1,5 @@
 TRACE: trc_control-center-test
-TIME: 2026-05-02T18:31:17Z
+TIME: 2026-05-02T23:04:58Z
 REPO: sovereign-codex/Codex-control-center
-WORKFLOW: control-center-result-receiver
-STATUS: result_stored
+WORKFLOW: cross-repo-dispatcher
+STATUS: dispatched

@@ -7,6 +7,13 @@
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "control-center-result-receiver",
       "status": "result_stored"
+    },
+    {
+      "event_id": "25264112484-1-1777763098",
+      "timestamp": "2026-05-02T23:04:58Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "cross-repo-dispatcher",
+      "status": "dispatched"
     }
   ]
 }

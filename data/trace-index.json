@@ -18,11 +18,11 @@
     },
     {
       "trace_id": "trc_control-center-test",
-      "latest": "2026-05-02T18:31:17Z",
-      "status": "result_stored",
+      "latest": "2026-05-02T23:04:58Z",
+      "status": "dispatched",
       "repo": "sovereign-codex/Codex-control-center",
-      "workflow": "control-center-result-receiver",
-      "event_count": 1
+      "workflow": "cross-repo-dispatcher",
+      "event_count": 2
     },
     {
       "trace_id": "trc_interlink-test",
