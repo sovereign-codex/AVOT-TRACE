@@ -2,80 +2,89 @@ name: AVOT Trace Receiver
 
 on:
   repository_dispatch:
-    types: [trace_log]
+    types:
+      - trace_log
 
 permissions:
   contents: write
+
+concurrency:
+  group: avot-trace-receiver
+  cancel-in-progress: false
 
 jobs:
   receive-trace:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout trace repo
         uses: actions/checkout@v4
 
       - name: Set variables
         run: |
-          TRACE_ID="${{ github.event.client_payload.trace_id || 'unknown-trace' }}"
-          REPO="${{ github.event.client_payload.repo || 'unknown-repo' }}"
-          WORKFLOW="${{ github.event.client_payload.workflow || 'unknown-workflow' }}"
-          STATUS="${{ github.event.client_payload.status || 'unknown-status' }}"
+          TRACE_ID="${{ github.event.client_payload.trace_id }}"
+          REPO="${{ github.event.client_payload.repo }}"
+          WORKFLOW="${{ github.event.client_payload.workflow }}"
+          STATUS="${{ github.event.client_payload.status }}"
+
+          if [ -z "$TRACE_ID" ]; then TRACE_ID="unknown-${GITHUB_RUN_ID}"; fi
+          if [ -z "$REPO" ]; then REPO="unknown-repo"; fi
+          if [ -z "$WORKFLOW" ]; then WORKFLOW="unknown-workflow"; fi
+          if [ -z "$STATUS" ]; then STATUS="unknown-status"; fi
 
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           DATE=$(date -u +"%Y-%m-%d")
-          EVENT_ID=$(date +%s%N)
+          EVENT_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$(date +%s)"
 
-          echo "TRACE_ID=$TRACE_ID" >> $GITHUB_ENV
-          echo "REPO=$REPO" >> $GITHUB_ENV
-          echo "WORKFLOW=$WORKFLOW" >> $GITHUB_ENV
-          echo "STATUS=$STATUS" >> $GITHUB_ENV
-          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-          echo "DATE=$DATE" >> $GITHUB_ENV
-          echo "EVENT_ID=$EVENT_ID" >> $GITHUB_ENV
+          echo "TRACE_ID=$TRACE_ID" >> "$GITHUB_ENV"
+          echo "REPO=$REPO" >> "$GITHUB_ENV"
+          echo "WORKFLOW=$WORKFLOW" >> "$GITHUB_ENV"
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+          echo "TIMESTAMP=$TIMESTAMP" >> "$GITHUB_ENV"
+          echo "DATE=$DATE" >> "$GITHUB_ENV"
+          echo "EVENT_ID=$EVENT_ID" >> "$GITHUB_ENV"
 
       - name: Ensure directories
         run: |
           mkdir -p logs/daily
+          mkdir -p logs/latest
           mkdir -p traces
+          mkdir -p data
 
-      # 🔥 APPEND-BASED TRACE (NOT OVERWRITE)
       - name: Append to trace timeline
         run: |
           FILE="traces/${TRACE_ID}.json"
 
-          EVENT=$(cat <<EOF
-{
-  "event_id": "$EVENT_ID",
-  "timestamp": "$TIMESTAMP",
-  "repo": "$REPO",
-  "workflow": "$WORKFLOW",
-  "status": "$STATUS"
-}
-EOF
-)
-
-          if [ -f "$FILE" ]; then
-            jq ".events += [$EVENT]" "$FILE" > tmp.json && mv tmp.json "$FILE"
-          else
-            echo "{
-  \"trace_id\": \"$TRACE_ID\",
-  \"events\": [
-    $EVENT
-  ]
-}" > "$FILE"
+          if [ ! -f "$FILE" ]; then
+            jq -n \
+              --arg trace_id "$TRACE_ID" \
+              '{ trace_id: $trace_id, events: [] }' > "$FILE"
           fi
+
+          jq \
+            --arg event_id "$EVENT_ID" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg repo "$REPO" \
+            --arg workflow "$WORKFLOW" \
+            --arg status "$STATUS" \
+            '.events += [{
+              event_id: $event_id,
+              timestamp: $timestamp,
+              repo: $repo,
+              workflow: $workflow,
+              status: $status
+            }]' "$FILE" > tmp.json
+
+          mv tmp.json "$FILE"
 
       - name: Append to daily log
         run: |
           LOG_FILE="logs/daily/${DATE}.log"
-
           echo "$TIMESTAMP | $TRACE_ID | $REPO | $WORKFLOW | $STATUS" >> "$LOG_FILE"
 
-      # 🔥 OPTIONAL: HUMAN-READABLE TRACE SNAPSHOT
       - name: Write latest snapshot
         run: |
-          SNAPSHOT="logs/latest_${TRACE_ID}.txt"
+          SNAPSHOT="logs/latest/${TRACE_ID}.txt"
 
           echo "TRACE: $TRACE_ID" > "$SNAPSHOT"
           echo "TIME: $TIMESTAMP" >> "$SNAPSHOT"
@@ -83,11 +92,49 @@ EOF
           echo "WORKFLOW: $WORKFLOW" >> "$SNAPSHOT"
           echo "STATUS: $STATUS" >> "$SNAPSHOT"
 
+      - name: Rebuild trace index
+        run: |
+          jq -n '{ traces: [] }' > data/trace-index.json
+
+          shopt -s nullglob
+
+          for file in traces/*.json; do
+            trace_id=$(jq -r '.trace_id // "unknown"' "$file")
+            latest=$(jq -r '.events[-1].timestamp // ""' "$file")
+            status=$(jq -r '.events[-1].status // "unknown"' "$file")
+            repo=$(jq -r '.events[-1].repo // "unknown"' "$file")
+            workflow=$(jq -r '.events[-1].workflow // "unknown"' "$file")
+            count=$(jq -r '.events | length' "$file")
+
+            jq \
+              --arg trace_id "$trace_id" \
+              --arg latest "$latest" \
+              --arg status "$status" \
+              --arg repo "$repo" \
+              --arg workflow "$workflow" \
+              --argjson count "$count" \
+              '.traces += [{
+                trace_id: $trace_id,
+                latest: $latest,
+                status: $status,
+                repo: $repo,
+                workflow: $workflow,
+                event_count: $count
+              }]' data/trace-index.json > tmp-index.json
+
+            mv tmp-index.json data/trace-index.json
+          done
+
       - name: Commit logs
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          git add logs/ traces/
-          git commit -m "Trace update: $TRACE_ID ($STATUS)" || echo "No changes"
-          git push
+          git pull origin main --rebase || echo "No remote changes"
+
+          git add logs/ traces/ data/
+          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes"
+
+          git pull origin main --rebase || echo "No remote changes"
+
+          git push origin main
