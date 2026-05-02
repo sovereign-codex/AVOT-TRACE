@@ -125,16 +125,22 @@ jobs:
             mv tmp-index.json data/trace-index.json
           done
 
-      - name: Commit logs
+            - name: Commit logs (conflict-proof)
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          git pull origin main --rebase || echo "No remote changes"
+          # Always sync but NEVER rebase
+          git fetch origin main
 
+          # Hard reset to remote to avoid conflicts
+          git reset --hard origin/main
+
+          # Re-apply our changes
           git add logs/ traces/ data/
-          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes"
 
-          git pull origin main --rebase || echo "No remote changes"
+          # Commit if needed
+          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes to commit"
 
+          # Push safely
           git push origin main
