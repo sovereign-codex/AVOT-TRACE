@@ -1,3 +1,4 @@
 2026-05-02T18:30:38Z | engine_25258856233 | sovereign-codex/AVOT-ARCHIVIST | engine-runner | started
 2026-05-02T18:30:47Z | trc_interlink-test | sovereign-codex/Codex-control-center | control-center-router | decision_created:control-center
 2026-05-02T18:31:02Z | trc_test-trigger | sovereign-codex/Codex-control-center | cross-repo-dispatcher | no_route_found
+2026-05-02T18:31:17Z | trc_control-center-test | sovereign-codex/Codex-control-center | control-center-result-receiver | result_stored

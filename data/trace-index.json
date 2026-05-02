@@ -9,6 +9,14 @@
       "event_count": 1
     },
     {
+      "trace_id": "trc_control-center-test",
+      "latest": "2026-05-02T18:31:17Z",
+      "status": "result_stored",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-result-receiver",
+      "event_count": 1
+    },
+    {
       "trace_id": "trc_interlink-test",
       "latest": "2026-05-02T18:30:47Z",
       "status": "decision_created:control-center",

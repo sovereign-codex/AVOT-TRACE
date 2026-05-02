@@ -1,0 +1,12 @@
+{
+  "trace_id": "trc_control-center-test",
+  "events": [
+    {
+      "event_id": "25258872444-1-1777746677",
+      "timestamp": "2026-05-02T18:31:17Z",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-result-receiver",
+      "status": "result_stored"
+    }
+  ]
+}
