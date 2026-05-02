@@ -34,11 +34,11 @@
     },
     {
       "trace_id": "trc_test-signal",
-      "latest": "2026-05-02T23:04:48Z",
-      "status": "decision_created:avot-engine",
-      "repo": "sovereign-codex/Codex-control-center",
-      "workflow": "control-center-router",
-      "event_count": 2
+      "latest": "2026-05-02T23:05:34Z",
+      "status": "result_sent",
+      "repo": "sovereign-codex/AVOT-engine",
+      "workflow": "avot-engine-receiver",
+      "event_count": 3
     },
     {
       "trace_id": "trc_test-trigger",

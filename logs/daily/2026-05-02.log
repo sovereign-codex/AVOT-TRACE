@@ -8,3 +8,4 @@
 2026-05-02T23:04:58Z | trc_control-center-test | sovereign-codex/Codex-control-center | cross-repo-dispatcher | dispatched
 2026-05-02T23:05:07Z | trc_control-center-test | sovereign-codex/AVOT-engine | avot-engine-receiver | engine_completed
 2026-05-02T23:05:18Z | trc_control-center-test | sovereign-codex/Codex-control-center | control-center-result-receiver | result_stored
+2026-05-02T23:05:34Z | trc_test-signal | sovereign-codex/AVOT-engine | avot-engine-receiver | result_sent
