@@ -1,4 +1,4 @@
-name: AVOT Trace Receiver
+lname: AVOT Trace Receiver
 
 on:
   repository_dispatch:
@@ -8,16 +8,12 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: avot-trace-receiver
-  cancel-in-progress: false
-
 jobs:
   receive-trace:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout trace repo
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set variables
@@ -51,7 +47,7 @@ jobs:
           mkdir -p traces
           mkdir -p data
 
-      - name: Append to trace timeline
+      - name: Update trace file
         run: |
           FILE="traces/${TRACE_ID}.json"
 
@@ -77,33 +73,16 @@ jobs:
 
           mv tmp.json "$FILE"
 
-      - name: Append to daily log
-        run: |
-          LOG_FILE="logs/daily/${DATE}.log"
-          echo "$TIMESTAMP | $TRACE_ID | $REPO | $WORKFLOW | $STATUS" >> "$LOG_FILE"
-
-      - name: Write latest snapshot
-        run: |
-          SNAPSHOT="logs/latest/${TRACE_ID}.txt"
-
-          echo "TRACE: $TRACE_ID" > "$SNAPSHOT"
-          echo "TIME: $TIMESTAMP" >> "$SNAPSHOT"
-          echo "REPO: $REPO" >> "$SNAPSHOT"
-          echo "WORKFLOW: $WORKFLOW" >> "$SNAPSHOT"
-          echo "STATUS: $STATUS" >> "$SNAPSHOT"
-
-      - name: Rebuild trace index
+      - name: Write trace index
         run: |
           jq -n '{ traces: [] }' > data/trace-index.json
 
-          shopt -s nullglob
-
           for file in traces/*.json; do
-            trace_id=$(jq -r '.trace_id // "unknown"' "$file")
-            latest=$(jq -r '.events[-1].timestamp // ""' "$file")
-            status=$(jq -r '.events[-1].status // "unknown"' "$file")
-            repo=$(jq -r '.events[-1].repo // "unknown"' "$file")
-            workflow=$(jq -r '.events[-1].workflow // "unknown"' "$file")
+            trace_id=$(jq -r '.trace_id' "$file")
+            latest=$(jq -r '.events[-1].timestamp' "$file")
+            status=$(jq -r '.events[-1].status' "$file")
+            repo=$(jq -r '.events[-1].repo' "$file")
+            workflow=$(jq -r '.events[-1].workflow' "$file")
             count=$(jq -r '.events | length' "$file")
 
             jq \
@@ -115,7 +94,7 @@ jobs:
               --argjson count "$count" \
               '.traces += [{
                 trace_id: $trace_id,
-                latest: $latest,
+                timestamp: $latest,
                 status: $status,
                 repo: $repo,
                 workflow: $workflow,
@@ -125,20 +104,18 @@ jobs:
             mv tmp-index.json data/trace-index.json
           done
 
-      - name: Commit logs (conflict-proof)
+      - name: Commit (conflict-proof)
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          # Sync safely without rebase
+          # Force clean state
           git fetch origin main
           git reset --hard origin/main
 
-          # Apply new changes
+          # Re-apply generated files
           git add logs/ traces/ data/
 
-          # Commit if needed
           git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes"
 
-          # Push
           git push origin main
