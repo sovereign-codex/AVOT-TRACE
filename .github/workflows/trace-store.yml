@@ -1,0 +1,120 @@
+name: Trace Store
+
+on:
+  repository_dispatch:
+    types: [trace-event]
+
+permissions:
+  contents: write
+
+jobs:
+  store:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # 1. LOAD EVENT
+      # -------------------------
+      - name: Load Event
+        id: load
+        run: |
+          echo '${{ toJson(github.event.client_payload) }}' > event.json
+
+          TRACE_ID=$(jq -r '.trace_id' event.json)
+          TIMESTAMP=$(jq -r '.timestamp' event.json)
+
+          echo "trace_id=$TRACE_ID" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+      # -------------------------
+      # 2. ENSURE TRACE FILE EXISTS
+      # -------------------------
+      - name: Prepare Trace File
+        run: |
+          mkdir -p traces
+
+          FILE="traces/${{ steps.load.outputs.trace_id }}.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo '{
+              "trace_id": "'${{ steps.load.outputs.trace_id }}'",
+              "created": "'${{ steps.load.outputs.timestamp }}'",
+              "updated": "'${{ steps.load.outputs.timestamp }}'",
+              "events": []
+            }' > "$FILE"
+          fi
+
+      # -------------------------
+      # 3. APPEND EVENT (ORDERED)
+      # -------------------------
+      - name: Append Event
+        run: |
+          FILE="traces/${{ steps.load.outputs.trace_id }}.json"
+
+          jq --slurpfile new event.json '
+            .events += $new |
+            .events |= sort_by(.timestamp) |
+            .updated = $new[0].timestamp
+          ' "$FILE" > tmp.json
+
+          mv tmp.json "$FILE"
+
+      # -------------------------
+      # 4. UPDATE GLOBAL INDEX
+      # -------------------------
+      - name: Update Index
+        run: |
+          mkdir -p index
+
+          INDEX="index/trace-index.json"
+
+          if [ ! -f "$INDEX" ]; then
+            echo '{"traces":[]}' > "$INDEX"
+          fi
+
+          TRACE_ID="${{ steps.load.outputs.trace_id }}"
+          TIMESTAMP="${{ steps.load.outputs.timestamp }}"
+
+          TRACE_FILE="traces/$TRACE_ID.json"
+
+          COUNT=$(jq '.events | length' "$TRACE_FILE")
+          STATUS=$(jq -r '.events[-1].status' "$TRACE_FILE")
+          REPO=$(jq -r '.events[-1].source' "$TRACE_FILE")
+          WORKFLOW=$(jq -r '.events[-1].workflow' "$TRACE_FILE")
+
+          jq --arg id "$TRACE_ID" \
+             --arg ts "$TIMESTAMP" \
+             --arg status "$STATUS" \
+             --arg repo "$REPO" \
+             --arg workflow "$WORKFLOW" \
+             --argjson count "$COUNT" '
+            .traces |=
+              (map(select(.trace_id != $id)) +
+              [{
+                trace_id: $id,
+                latest: $ts,
+                status: $status,
+                repo: $repo,
+                workflow: $workflow,
+                event_count: $count
+              }])
+          ' "$INDEX" > tmp.json
+
+          mv tmp.json "$INDEX"
+
+      # -------------------------
+      # 5. COMMIT CHANGES
+      # -------------------------
+      - name: Commit Trace
+        run: |
+          git config user.name "trace-bot"
+          git config user.email "trace@codex"
+
+          git add traces/ index/
+
+          git commit -m "trace: update ${{ steps.load.outputs.trace_id }}" || echo "no changes"
+
+          git push
