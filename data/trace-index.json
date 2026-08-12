@@ -55,6 +55,15 @@
       "event_count": 1
     },
     {
+      "trace_id": "engine_31564894890",
+      "timestamp": "2026-08-12T04:56:49Z",
+      "status": "started",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
       "trace_id": "trc_control center test",
       "timestamp": "2026-05-02T23:04:38Z",
       "status": "normalized",
