@@ -15,6 +15,14 @@
       "workflow": "engine-runner",
       "status": "handoff_sent",
       "event_id": "416364faca1a6bee08dbb0b0"
+    },
+    {
+      "trace_id": "trc_test-trigger",
+      "timestamp": "2026-08-12T04:57:02Z",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "status": "normalized",
+      "event_id": "2f950dd177a885382ea9112c"
     }
   ]
 }
