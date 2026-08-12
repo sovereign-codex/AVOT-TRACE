@@ -1,51 +1,111 @@
 {
   "traces": [
     {
+      "trace_id": "META-CIRCULATION-004",
+      "timestamp": "2026-08-12T04:52:00Z",
+      "status": "downstream_continuity_probe",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "archivist-ingest",
+      "event_class": "institutional_event",
+      "event_count": 1
+    },
+    {
       "trace_id": "engine_25258856233",
-      "latest": "2026-05-02T18:30:38Z",
+      "timestamp": "2026-05-02T18:30:38Z",
       "status": "started",
       "repo": "sovereign-codex/AVOT-ARCHIVIST",
       "workflow": "engine-runner",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
+      "trace_id": "engine_25264526756",
+      "timestamp": "2026-05-02T23:27:51Z",
+      "status": "started",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
+      "trace_id": "engine_25264564244",
+      "timestamp": "2026-05-02T23:29:29Z",
+      "status": "started",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
+      "trace_id": "engine_25285171457",
+      "timestamp": "2026-05-03T16:57:52Z",
+      "status": "started",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "event_class": "",
       "event_count": 1
     },
     {
       "trace_id": "trc_control center test",
-      "latest": "2026-05-02T23:04:38Z",
+      "timestamp": "2026-05-02T23:04:38Z",
       "status": "normalized",
       "repo": "sovereign-codex/AVOT-ARCHIVIST",
       "workflow": "engine-runner",
+      "event_class": "",
       "event_count": 1
     },
     {
       "trace_id": "trc_control-center-test",
-      "latest": "2026-05-02T23:05:18Z",
+      "timestamp": "2026-05-02T23:05:18Z",
       "status": "result_stored",
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "control-center-result-receiver",
+      "event_class": "",
       "event_count": 4
     },
     {
       "trace_id": "trc_interlink-test",
-      "latest": "2026-05-02T18:30:47Z",
+      "timestamp": "2026-05-02T18:30:47Z",
       "status": "decision_created:control-center",
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "control-center-router",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
+      "trace_id": "trc_research quantum mapping",
+      "timestamp": "2026-05-02T23:28:07Z",
+      "status": "decision_created:control-center",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "event_class": "",
+      "event_count": 1
+    },
+    {
+      "trace_id": "trc_research-quantum-mapping",
+      "timestamp": "2026-05-02T23:29:44Z",
+      "status": "decision_created:control-center",
+      "repo": "sovereign-codex/Codex-control-center",
+      "workflow": "control-center-router",
+      "event_class": "",
       "event_count": 1
     },
     {
       "trace_id": "trc_test-signal",
-      "latest": "2026-05-02T23:05:34Z",
+      "timestamp": "2026-05-02T23:05:34Z",
       "status": "result_sent",
       "repo": "sovereign-codex/AVOT-engine",
       "workflow": "avot-engine-receiver",
+      "event_class": "",
       "event_count": 3
     },
     {
       "trace_id": "trc_test-trigger",
-      "latest": "2026-05-02T18:31:02Z",
+      "timestamp": "2026-05-02T18:31:02Z",
       "status": "no_route_found",
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "cross-repo-dispatcher",
+      "event_class": "",
       "event_count": 1
     }
   ]

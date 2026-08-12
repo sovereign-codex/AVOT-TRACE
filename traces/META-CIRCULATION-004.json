@@ -1,0 +1,53 @@
+{
+  "trace_id": "META-CIRCULATION-004",
+  "events": [
+    {
+      "trace_id": "META-CIRCULATION-004",
+      "timestamp": "2026-08-12T04:52:00Z",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "archivist-ingest",
+      "status": "downstream_continuity_probe",
+      "event_class": "institutional_event",
+      "protocol_version": "meta-circulation/0.4",
+      "semantic": {
+        "authority_state": "authorized_by_accountable_human",
+        "execution_state": "trace_boundary_under_test",
+        "flow_state": "archivist_to_trace_to_graph",
+        "handoff_semantics": {
+          "continuity_worthy": true,
+          "next_agent_required": false,
+          "rediscovery_required": false,
+          "return_basis": "downstream_semantic_continuity"
+        },
+        "institutional_state": "semantic_membrane_active",
+        "next_valid_action": "inspect_trace_and_graph_projection",
+        "receiving_office": "Office Incoming Inventory",
+        "review_requirement": "deferred_to_daily_cycle",
+        "review_role": "Promotion Reviewer",
+        "source_role": "Bootstrap Coordinator"
+      },
+      "evidence": {
+        "observations": [
+          "Archivist semantic membrane preserved approved vocabulary",
+          "Control Center routing decision still uses legacy routing fields",
+          "AVOT-TRACE receiver was evolved to accept canonical institutional events",
+          "Codex graph projection should remain conservative until trace evidence is visible"
+        ],
+        "source_commission": "META-CIRCULATION-003",
+        "terminal_result": "trace_and_graph_continuity_probe",
+        "test_questions": [
+          "Does AVOT-TRACE preserve the canonical semantic event?",
+          "Does TRACE remain idempotent for the same canonical event?",
+          "Does Codex-net-index discover the trace on its next ingestion cycle?",
+          "Which semantic fields merit graph nodes or edges rather than event attributes?"
+        ]
+      },
+      "normalization": {
+        "admission_posture": "allowlisted",
+        "membrane_version": "archivist.semantic.v0.1-experimental",
+        "source_file": "incoming/signals/meta-circulation-004.json"
+      },
+      "event_id": "308802a8a585328c8a61b350"
+    }
+  ]
+}
