@@ -10,6 +10,15 @@
       "event_count": 1
     },
     {
+      "trace_id": "META-CIRCULATION-005",
+      "timestamp": "2026-08-12T05:08:00Z",
+      "status": "institutional_graph_probe",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "archivist-ingest",
+      "event_class": "institutional_event",
+      "event_count": 1
+    },
+    {
       "trace_id": "engine_25258856233",
       "timestamp": "2026-05-02T18:30:38Z",
       "status": "started",
