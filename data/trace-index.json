@@ -101,12 +101,12 @@
     },
     {
       "trace_id": "trc_test-trigger",
-      "timestamp": "2026-05-02T18:31:02Z",
-      "status": "no_route_found",
-      "repo": "sovereign-codex/Codex-control-center",
-      "workflow": "cross-repo-dispatcher",
+      "timestamp": "2026-08-12T04:52:16Z",
+      "status": "handoff_sent",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
       "event_class": "",
-      "event_count": 1
+      "event_count": 2
     }
   ]
 }

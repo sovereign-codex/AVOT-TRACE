@@ -7,6 +7,14 @@
       "repo": "sovereign-codex/Codex-control-center",
       "workflow": "cross-repo-dispatcher",
       "status": "no_route_found"
+    },
+    {
+      "trace_id": "trc_test-trigger",
+      "timestamp": "2026-08-12T04:52:16Z",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "engine-runner",
+      "status": "handoff_sent",
+      "event_id": "416364faca1a6bee08dbb0b0"
     }
   ]
 }
