@@ -1,12 +1,17 @@
-lname: AVOT Trace Receiver
+name: AVOT Trace Receiver
 
 on:
   repository_dispatch:
     types:
       - trace_log
+      - institutional_event
 
 permissions:
   contents: write
+
+concurrency:
+  group: avot-trace-write
+  cancel-in-progress: false
 
 jobs:
   receive-trace:
@@ -15,74 +20,90 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set variables
+      - name: Sync latest main
+        run: git pull --rebase origin main || true
+
+      - name: Normalize received trace event
+        env:
+          RAW_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
-          TRACE_ID="${{ github.event.client_payload.trace_id }}"
-          REPO="${{ github.event.client_payload.repo }}"
-          WORKFLOW="${{ github.event.client_payload.workflow }}"
-          STATUS="${{ github.event.client_payload.status }}"
+          mkdir -p /tmp/trace-receiver
+          printf '%s' "$RAW_PAYLOAD" > /tmp/trace-receiver/payload.json
+
+          jq '.event // .' /tmp/trace-receiver/payload.json > /tmp/trace-receiver/event.json
+
+          TRACE_ID=$(jq -r '.trace_id // empty' /tmp/trace-receiver/event.json)
+          REPO=$(jq -r '.repo // empty' /tmp/trace-receiver/event.json)
+          WORKFLOW=$(jq -r '.workflow // empty' /tmp/trace-receiver/event.json)
+          STATUS=$(jq -r '.status // "unknown-status"' /tmp/trace-receiver/event.json)
+          TIMESTAMP=$(jq -r '.timestamp // empty' /tmp/trace-receiver/event.json)
 
           if [ -z "$TRACE_ID" ]; then TRACE_ID="unknown-${GITHUB_RUN_ID}"; fi
           if [ -z "$REPO" ]; then REPO="unknown-repo"; fi
           if [ -z "$WORKFLOW" ]; then WORKFLOW="unknown-workflow"; fi
-          if [ -z "$STATUS" ]; then STATUS="unknown-status"; fi
-
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          DATE=$(date -u +"%Y-%m-%d")
-          EVENT_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$(date +%s)"
-
-          echo "TRACE_ID=$TRACE_ID" >> $GITHUB_ENV
-          echo "REPO=$REPO" >> $GITHUB_ENV
-          echo "WORKFLOW=$WORKFLOW" >> $GITHUB_ENV
-          echo "STATUS=$STATUS" >> $GITHUB_ENV
-          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-          echo "DATE=$DATE" >> $GITHUB_ENV
-          echo "EVENT_ID=$EVENT_ID" >> $GITHUB_ENV
-
-      - name: Ensure directories
-        run: |
-          mkdir -p logs/daily
-          mkdir -p logs/latest
-          mkdir -p traces
-          mkdir -p data
-
-      - name: Update trace file
-        run: |
-          FILE="traces/${TRACE_ID}.json"
-
-          if [ ! -f "$FILE" ]; then
-            jq -n \
-              --arg trace_id "$TRACE_ID" \
-              '{ trace_id: $trace_id, events: [] }' > "$FILE"
-          fi
+          if [ -z "$TIMESTAMP" ]; then TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); fi
 
           jq \
-            --arg event_id "$EVENT_ID" \
-            --arg timestamp "$TIMESTAMP" \
+            --arg trace_id "$TRACE_ID" \
             --arg repo "$REPO" \
             --arg workflow "$WORKFLOW" \
             --arg status "$STATUS" \
-            '.events += [{
-              event_id: $event_id,
+            --arg timestamp "$TIMESTAMP" \
+            '{
+              trace_id: $trace_id,
               timestamp: $timestamp,
               repo: $repo,
               workflow: $workflow,
               status: $status
-            }]' "$FILE" > tmp.json
+            }
+            + (if .event_class? != null then {event_class: .event_class} else {} end)
+            + (if .protocol_version? != null then {protocol_version: .protocol_version} else {} end)
+            + (if (.semantic? | type) == "object" then {semantic: .semantic} else {} end)
+            + (if (.evidence? | type) == "object" then {evidence: .evidence} else {} end)
+            + (if (.normalization? | type) == "object" then {normalization: .normalization} else {} end)' \
+            /tmp/trace-receiver/event.json > /tmp/trace-receiver/canonical.json
+
+          EVENT_ID=$(jq -cS . /tmp/trace-receiver/canonical.json | sha256sum | cut -c1-24)
+          jq --arg event_id "$EVENT_ID" '. + {event_id: $event_id}' \
+            /tmp/trace-receiver/canonical.json > /tmp/trace-receiver/canonical-with-id.json
+
+          echo "TRACE_ID=$TRACE_ID" >> $GITHUB_ENV
+          echo "EVENT_ID=$EVENT_ID" >> $GITHUB_ENV
+
+      - name: Ensure directories
+        run: |
+          mkdir -p traces
+          mkdir -p data
+
+      - name: Update trace file idempotently
+        run: |
+          FILE="traces/${TRACE_ID}.json"
+
+          if [ ! -f "$FILE" ]; then
+            jq -n --arg trace_id "$TRACE_ID" '{trace_id: $trace_id, events: []}' > "$FILE"
+          fi
+
+          jq --slurpfile new /tmp/trace-receiver/canonical-with-id.json \
+            'if any(.events[]?; .event_id == $new[0].event_id) then . else .events += $new end' \
+            "$FILE" > tmp.json
 
           mv tmp.json "$FILE"
 
       - name: Write trace index
         run: |
-          jq -n '{ traces: [] }' > data/trace-index.json
+          jq -n '{traces: []}' > data/trace-index.json
 
           for file in traces/*.json; do
+            [ -f "$file" ] || continue
             trace_id=$(jq -r '.trace_id' "$file")
-            latest=$(jq -r '.events[-1].timestamp' "$file")
-            status=$(jq -r '.events[-1].status' "$file")
-            repo=$(jq -r '.events[-1].repo' "$file")
-            workflow=$(jq -r '.events[-1].workflow' "$file")
+            latest=$(jq -r '.events[-1].timestamp // ""' "$file")
+            status=$(jq -r '.events[-1].status // "unknown"' "$file")
+            repo=$(jq -r '.events[-1].repo // "unknown-repo"' "$file")
+            workflow=$(jq -r '.events[-1].workflow // "unknown-workflow"' "$file")
+            event_class=$(jq -r '.events[-1].event_class // ""' "$file")
             count=$(jq -r '.events | length' "$file")
 
             jq \
@@ -91,6 +112,7 @@ jobs:
               --arg status "$status" \
               --arg repo "$repo" \
               --arg workflow "$workflow" \
+              --arg event_class "$event_class" \
               --argjson count "$count" \
               '.traces += [{
                 trace_id: $trace_id,
@@ -98,24 +120,19 @@ jobs:
                 status: $status,
                 repo: $repo,
                 workflow: $workflow,
+                event_class: $event_class,
                 event_count: $count
               }]' data/trace-index.json > tmp-index.json
 
             mv tmp-index.json data/trace-index.json
           done
 
-      - name: Commit (conflict-proof)
+      - name: Commit trace state
         run: |
           git config user.name "trace-bot"
           git config user.email "actions@github.com"
 
-          # Force clean state
-          git fetch origin main
-          git reset --hard origin/main
-
-          # Re-apply generated files
-          git add logs/ traces/ data/
-
-          git commit -m "Trace update: ${TRACE_ID} (${STATUS})" || echo "No changes"
-
+          git add traces/ data/
+          git commit -m "Trace update: ${TRACE_ID}" || echo "No changes"
+          git pull --rebase origin main || true
           git push origin main
