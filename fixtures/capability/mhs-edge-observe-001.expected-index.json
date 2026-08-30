@@ -1,0 +1,43 @@
+{
+  "generated_from": "trace-receiver-current-projection-semantics",
+  "projection_posture": "offline_fixture_only",
+  "traces": [
+    {
+      "trace_id": "capability-mhs-edge-observe-001",
+      "timestamp": "2026-08-28T10:50:00Z",
+      "status": "capability_observed",
+      "repo": "sovereign-codex/AVOT-ARCHIVIST",
+      "workflow": "offline-capability-fixture",
+      "event_class": "institutional_event",
+      "event_count": 1,
+      "full_trace_ref": "fixtures/capability/mhs-edge-observe-001.expected-trace.json",
+      "projection_omissions": [
+        "evidence.observations[0]",
+        "evidence.observations[1]",
+        "evidence.observations[2]",
+        "evidence.source_commission",
+        "evidence.terminal_result",
+        "evidence.test_questions[0]",
+        "evidence.test_questions[1]",
+        "evidence.test_questions[2]",
+        "normalization.admission_posture",
+        "normalization.membrane_version",
+        "normalization.source_file",
+        "protocol_version",
+        "semantic.authority_state",
+        "semantic.execution_state",
+        "semantic.flow_state",
+        "semantic.handoff_semantics.continuity_worthy",
+        "semantic.handoff_semantics.next_agent_required",
+        "semantic.handoff_semantics.rediscovery_required",
+        "semantic.handoff_semantics.return_basis",
+        "semantic.institutional_state",
+        "semantic.next_valid_action",
+        "semantic.receiving_office",
+        "semantic.review_requirement",
+        "semantic.review_role",
+        "semantic.source_role"
+      ]
+    }
+  ]
+}

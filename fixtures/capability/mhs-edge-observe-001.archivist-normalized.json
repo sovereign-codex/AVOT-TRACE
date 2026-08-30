@@ -1,0 +1,52 @@
+{
+  "trace_id": "capability-mhs-edge-observe-001",
+  "workflow": "offline-capability-fixture",
+  "repo": "sovereign-codex/AVOT-ARCHIVIST",
+  "status": "capability_observed",
+  "timestamp": "2026-08-28T10:50:00Z",
+  "event_class": "institutional_event",
+  "protocol_version": "sovereign-capability/0.1",
+  "semantic": {
+    "institutional_state": "capability_fixture_under_test",
+    "execution_state": "offline_static_validation",
+    "flow_state": "source_to_expected_normalization",
+    "authority_state": "observe_only_human_authorized",
+    "next_valid_action": "review_fixture_preservation_return",
+    "source_role": "Fabricator",
+    "receiving_office": "TYME Hall capability reconciliation",
+    "review_role": "Promotion Reviewer",
+    "review_requirement": "human_review_required",
+    "handoff_semantics": {
+      "next_agent_required": false,
+      "rediscovery_required": false,
+      "return_basis": "offline_capability_preservation_fixture",
+      "continuity_worthy": true
+    }
+  },
+  "evidence": {
+    "source_commission": "FPP-SCC-ARCHIVIST-FIXTURE-001",
+    "terminal_result": "synthetic_observation_fixture",
+    "observations": [
+      "The reading is synthetic and does not originate from hardware.",
+      "The authority ceiling is observe-only.",
+      "Current Archivist normalization preserves only an allowlisted semantic subset."
+    ],
+    "test_questions": [
+      "Do capability, adapter, and device identities survive normalization?",
+      "Does the authority basis survive with its allow-list and prohibitions?",
+      "Are all lost fields explicitly classified?"
+    ]
+  },
+  "normalization": {
+    "membrane_version": "archivist.semantic.v0.1-experimental",
+    "admission_posture": "allowlisted",
+    "source_file": "fixtures/capability/mhs-edge-observe-001.source.json"
+  },
+  "fixture_provenance": {
+    "source_repository": "sovereign-codex/AVOT-ARCHIVIST",
+    "source_branch": "experiment/scc-archivist-fixture-001",
+    "source_commit": "dea7c0cec916b5985c82dd23fae01d6fb2957d58",
+    "source_path": "fixtures/capability/mhs-edge-observe-001.expected-normalized.json",
+    "source_blob_sha": "84f27291ac85be43ca238aa876931ba55f73f4ed"
+  }
+}
