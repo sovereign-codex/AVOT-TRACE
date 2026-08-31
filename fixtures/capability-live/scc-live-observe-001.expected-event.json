@@ -1,0 +1,107 @@
+{
+  "trace_id": "capability-scc-live-observe-001",
+  "timestamp": "2026-08-31T11:23:00Z",
+  "repo": "sovereign-codex/AVOT-ARCHIVIST",
+  "workflow": "scc-live-observe-001",
+  "status": "capability_observed",
+  "event_class": "institutional_event",
+  "protocol_version": "sovereign-capability/0.1",
+  "semantic": {
+    "institutional_state": "synthetic_test",
+    "execution_state": "not_started",
+    "flow_state": "test_ingress",
+    "authority_state": "observe_only",
+    "next_valid_action": "witness_in_trace_only",
+    "source_role": "archivist-capability-test",
+    "receiving_office": "AVOT-TRACE",
+    "review_role": "Promotion Reviewer",
+    "review_requirement": "human_review_before_any_promotion",
+    "handoff_semantics": {
+      "next_agent_required": false,
+      "rediscovery_required": false,
+      "return_basis": "synthetic_live_circulation_observation",
+      "continuity_worthy": true
+    }
+  },
+  "evidence": {
+    "source_commission": "FPP-SCC-LIVE-OBSERVE-001",
+    "terminal_result": "synthetic_observe_only_fixture",
+    "observations": [
+      "No hardware endpoint exists.",
+      "No Control Center dispatch is permitted.",
+      "The only live consequence permitted after a separate gate is TRACE witness."
+    ],
+    "test_questions": [
+      "Did Archivist preserve capability_context exactly?",
+      "Did TRACE preserve capability_context exactly?",
+      "Did replay remain idempotent?"
+    ]
+  },
+  "normalization": {
+    "membrane_version": "archivist.capability-test.v0.1",
+    "admission_posture": "synthetic_test_only",
+    "source_file": "capability-test/incoming/scc-live-observe-001.json"
+  },
+  "capability_context": {
+    "identity": {
+      "capability_id": "cap.synthetic.environment.observe.v1",
+      "adapter_id": "adapter.archivist.synthetic-test.v1",
+      "device_or_surface_id": "surface.synthetic.environment.v1",
+      "actor_id": "workflow.scc-live-observe-001"
+    },
+    "declaration": {
+      "actuation_available": false,
+      "declared_actions": [
+        "discover",
+        "read_synthetic_state",
+        "return_evidence"
+      ],
+      "unavailable_actions": [
+        "write_state",
+        "energize_output",
+        "move_device",
+        "modify_interlock",
+        "physical_actuation"
+      ]
+    },
+    "authority": {
+      "posture": "observe",
+      "ceiling": "observe",
+      "basis_ref": "FPP-SCC-LIVE-OBSERVE-001",
+      "gate_ref": "human-explicit-live-pilot-gate",
+      "allowed_actions": [
+        "discover",
+        "read_synthetic_state",
+        "return_evidence"
+      ],
+      "prohibited_actions": [
+        "write_state",
+        "dispatch_execution",
+        "physical_actuation",
+        "procedure_promotion",
+        "authority_escalation"
+      ]
+    },
+    "constraints": {
+      "safe_state": "no_effect",
+      "hard_interlocks": [
+        "no_hardware_endpoint",
+        "no_external_device_api",
+        "no_control_center_dispatch"
+      ],
+      "prohibited_conditions": [
+        "actuation_available_true",
+        "authority_ceiling_above_observe",
+        "allowed_prohibited_overlap"
+      ]
+    },
+    "evidence_refs": {
+      "telemetry_refs": [],
+      "artifact_refs": [
+        "capability-test/incoming/scc-live-observe-001.json"
+      ],
+      "contradictions": []
+    }
+  },
+  "event_id": "11b26bdf14ce344997985af9"
+}
