@@ -63,7 +63,8 @@ jobs:
             + (if .protocol_version? != null then {protocol_version: .protocol_version} else {} end)
             + (if (.semantic? | type) == "object" then {semantic: .semantic} else {} end)
             + (if (.evidence? | type) == "object" then {evidence: .evidence} else {} end)
-            + (if (.normalization? | type) == "object" then {normalization: .normalization} else {} end)' \
+            + (if (.normalization? | type) == "object" then {normalization: .normalization} else {} end)
+            + (if (.capability_context? | type) == "object" then {capability_context: .capability_context} else {} end)' \
             /tmp/trace-receiver/event.json > /tmp/trace-receiver/canonical.json
 
           EVENT_ID=$(jq -cS . /tmp/trace-receiver/canonical.json | sha256sum | cut -c1-24)
